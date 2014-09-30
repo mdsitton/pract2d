@@ -13,6 +13,8 @@ class Window(object):
         self.y = sdl.SDL_WINDOWPOS_UNDEFINED
         self.fullscreen = fullscreen
 
+        self.context = None
+
         self.flags = sdl.SDL_WINDOW_OPENGL | sdl.SDL_WINDOW_RESIZABLE
 
         if fullscreen:
@@ -45,4 +47,4 @@ class Window(object):
         sdl.SDL_GL_MakeCurrent(window, context)
 
     def destroy(self):
-        pass
+        sdl.SDL_DestroyWindow(self.window)
