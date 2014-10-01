@@ -1,31 +1,6 @@
 import sdl2 as sdl
 
-class ContextManager(object):
-    '''
-    This class collects all contexts inside static variables.
-    It's similar to WindowManager in purpose 
-    '''
-    contexts = []
-
-    def register(self):
-        if not self in ContextManager.contexts:
-            conID = len(ContextManager.contexts)
-
-            ContextManager.contexts.append(self)
-
-            return conID
-
-    def unregister(self):
-        if self in ContextManager.contexts:
-            for n, item in enumerate(ContextManager.contexts):
-                if item is self:
-                    # We don't want to remove the item in the list
-                    # Because that would invalidate all other id's
-                    ContextManager.contexts[n] = None
-                    break
-
-
-class Context(ContextManager):
+class Context(object):
     def __init__(self, major, minor, msaa=2):
         self.major = major
         self.minor = minor
