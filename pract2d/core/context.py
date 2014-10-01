@@ -9,8 +9,6 @@ class Context(object):
         self.context = None
         self._window = None
 
-        self.id = self.register()
-
         sdl.SDL_GL_SetAttribute(sdl.SDL_GL_DOUBLEBUFFER, 1)
 
         sdl.SDL_GL_SetAttribute(sdl.SDL_GL_CONTEXT_MAJOR_VERSION, major)
@@ -24,7 +22,6 @@ class Context(object):
 
     def destroy(self):
         sdl.SDL_GL_DeleteContext(self.context)
-        self.unregister()
 
     @property
     def window(self):
