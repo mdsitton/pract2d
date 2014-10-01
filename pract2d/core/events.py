@@ -1,4 +1,5 @@
 import ctypes as ct
+import types
 import sdl2 as sdl
 import window
 
@@ -16,6 +17,7 @@ class EventListenerBase(object):
         pass
 
     def window_resize(self):
+        pass
 
 class Events(object):
 
@@ -26,7 +28,7 @@ class Events(object):
         self.classListeners = []
 
     def get_listener_list(self, obj):
-        if isinstance(listenerObj, object):
+        if isinstance(obj, types.InstanceType):
             return self.classListeners
         else:
             return self.funcListeners
@@ -47,7 +49,7 @@ class Events(object):
         for listener in self.classListeners:
             getattr(listener, event)(*args)
         for listener in self.funcListeners:
-            listener(event, *args)
+            listener(event, args)
 
     def run(self):
         event = sdl.SDL_Event()
@@ -55,6 +57,9 @@ class Events(object):
         while sdl.SDL_PollEvent(ct.byref(event)):
             # Events with sub-event types
             # These sub-events can be dispatched instead of the main event.
+            eventName = None
+            data = None
+
             if event.type == sdl.SDL_QUIT:
                 eventName = 'quit'
                 data = tuple()
@@ -74,17 +79,16 @@ class Events(object):
             elif event.type == sdl.SDL_WINDOWEVENT:
                 _winEvent = event.window.event
                 sdlWinID = event.window.windowID
-                winID = window.BWinMan._from_sdl_id(sdlWinID)
+                winID = window.WindowManager._from_sdl_id(sdlWinID)
                 # Might use later on but for now its just here
-                windowInstance = window.BWinMan._windows[winID]
+                windowInstance = window.WindowManager.get_window(winID)
 
                 if _winEvent == sdl.SDL_WINDOWEVENT_CLOSE:
                     eventName = 'window_close'
-                    data = tuple(winID)
+                    data = (winID,)
 
-                elif _winEvent == sdl.SDL_WINDOWEVENT_RESIZE:
+                elif _winEvent == sdl.SDL_WINDOWEVENT_RESIZED:
                     eventName = 'window_resize'
                     data = (winID, event.window.data1, event.window.data2)
-
-            self.broadcast_event(eventName, data)
-            
+            if eventName and data:
+                self.broadcast_event(eventName, data)
