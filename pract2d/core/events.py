@@ -51,7 +51,7 @@ class Events(object):
         for listener in self.funcListeners:
             listener(event, args)
 
-    def run(self):
+    def process(self):
         event = sdl.SDL_Event()
 
         while sdl.SDL_PollEvent(ct.byref(event)):
