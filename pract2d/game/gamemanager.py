@@ -45,6 +45,8 @@ class GameManager(object):
             print ('Window {} needs to be closed.'.format(data[0]))
             winInstance= window.WindowManager.get_window(data[0])
             winInstance.destroy()
+            if len(window.WindowManager.windows) < 1:
+                self.running = False
 
     def do_run(self):
         self.events.process()
