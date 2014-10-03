@@ -2,6 +2,8 @@ from pract2d.core import events
 from pract2d.core import window
 from pract2d.core import context
 
+from pract2d.core import glmath
+
 import OpenGL.GL as gl
 from PIL import Image
 
@@ -24,6 +26,9 @@ class GameManager(object):
             tmpChar = tmpChar.convert('RGBA')
 
         self.character = list(tmpChar.getdata())
+
+        # Math
+        self.projection = glmath.ortho(0.0, self.height, self.width, 0.0, -1.0, 1.0)
 
     def render(self):
         gl.glClearColor(0.5, 0.5, 0.5, 1.0)
