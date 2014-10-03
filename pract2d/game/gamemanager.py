@@ -3,18 +3,30 @@ from pract2d.core import window
 from pract2d.core import context
 
 import OpenGL.GL as gl
+from PIL import Image
 
 class GameManager(object):
     def __init__(self):
+
+        self.width = 800
+        self.height = 600
+
         self.events = events.Events()
-        self.window = window.Window('Hello World!', 800, 600, False)
+        self.window = window.Window('Hello World!', self.width, self.height, False)
         self.context = context.Context(3, 3)
         self.running = False
 
         self.events.add_listener(self.event_handler)
 
+        #images
+        tmpChar = Image.open('./data/character.png')
+        if ''.join(tmpChar.getbands()) != 'RGBA':
+            tmpChar = tmpChar.convert('RGBA')
+
+        self.character = list(tmpChar.getdata())
+
     def render(self):
-        gl.glClearColor(1.0, 1.0, 1.0, 1.0)
+        gl.glClearColor(0.5, 0.5, 0.5, 1.0)
         gl.glClear(gl.GL_COLOR_BUFFER_BIT)
 
 
