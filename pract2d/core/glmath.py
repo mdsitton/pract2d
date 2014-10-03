@@ -7,7 +7,7 @@ def zero_vector(size):
 
 def identity(size):
     ''' Return an identity matrix of the requested size '''
-    return [[1.0 if x==y 0.0 for y in xrange(size)] for x in xrange(size)]
+    return [[1.0 if x==y else 0.0 for y in xrange(size)] for x in xrange(size)]
 
 def zero_matrix(size):
     ''' Return a zero filled matrix of the requested size '''
@@ -17,9 +17,9 @@ def matrix_multiply(matrixA, matrixB):
     ''' Multiplys matrixA with matrixB '''
     sizeA = len(matrixA)
     matOut = zero_matrix(sizeA)
-    for i in range(sizeA)
-        for j in range(sizeA)
-            for k in range(sizeA)
+    for i in range(sizeA):
+        for j in range(sizeA):
+            for k in range(sizeA):
                 matOut[i][j] += matrixA[i][k] * matrixB[k][j]
 
     return matOut
@@ -28,19 +28,19 @@ def matrix_vector_multiply(matrix, vector):
     matSize = len(matrix)
     vecSize = len(vector)
     vecOut = vector.zero_vector(vecSize)
-    for i in xrange(matSize)
-        for j in xrange(matSize)
+    for i in xrange(matSize):
+        for j in xrange(matSize):
             vecOut[i] += vector[j] * matrix[i][j]
     return vecOut
 
 def ortho(left, right, bottom, top, zNear, zFar):
     rtnMat = zero_matrix(4)
-    rtnMat[0][0] = 2 / (right - left)
-    rtnMat[1][1] = 2 / (top - bottom)
-    rtnMat[2][2] = - 2 / (zFar - zNear)
-    rtnMat[3][0] = - (right + left) / (right - left)
-    rtnMat[3][1] = - (top + bottom) / (top - bottom)
-    rtnMat[3][2] = - (zFar + zNear) / (zFar - zNear)
+    rtnMat[0][0] = 2.0 / (right - left)
+    rtnMat[1][1] = 2.0 / (top - bottom)
+    rtnMat[2][2] = - 2.0 / (zFar - zNear)
+    rtnMat[3][0] = - (right + left) / (float(right) - left)
+    rtnMat[3][1] = - (top + bottom) / (float(top) - bottom)
+    rtnMat[3][2] = - (zFar + zNear) / (float(zFar) - zNear)
     return rtnMat
 
 
