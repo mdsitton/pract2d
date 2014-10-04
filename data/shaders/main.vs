@@ -1,12 +1,12 @@
 #version 330
 
-layout(location = 0) in vec3 position;
+layout(location = 0) in vec2 position;
 //layout(location=1) in vec4 vertColor
 
 uniform mat4 ortho;
-uniform mat3 model;
+uniform mat4 model;
 
-mat3 mvp;
+mat4 mvp;
 
 void main()
 {	
