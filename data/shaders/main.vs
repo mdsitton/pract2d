@@ -1,14 +1,16 @@
 #version 330
 
-layout(location=0) in vec3 vertPosition;
+layout(location = 0) in vec3 position;
 //layout(location=1) in vec4 vertColor
 
-uniform mat3 ortho;
-uniform mat4 model;
+uniform mat4 ortho;
+uniform mat3 model;
+
+mat3 mvp;
 
 void main()
 {	
-	vec3 mvp = ortho * model;
-	gl_position = ortho * vec4( model * vertPosition, 1.0 );
+	mvp = ortho * model;
+	gl_Position = mvp * vec4( position, 1.0, 1.0 );
 
 }
