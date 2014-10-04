@@ -1,4 +1,5 @@
 import math
+from OpenGL.GL import GLfloat
 # todo python 2 - 3 compatibility fixes
 
 def zero_vector(size):
@@ -45,6 +46,15 @@ def ortho(left, right, bottom, top, zNear, zFar):
     rtnObj.matrix = rtnMat
     return rtnObj
 
+def convert_matrix(matrix):
+    ''' Converts a 2d matrix list to be used with PyOpenGL '''
+    length = len(matrix)
+    tempMatrix = (GLfloat * (length * length))()
+    for x in xrange(length):
+        for y in xrange(length):
+            print (x*length+y)
+            tempMatrix[x*length+y] = matrix[x][y]
+    return tempMatrix
 
 class Vector(object):
     def __init__(self, size):
@@ -58,7 +68,10 @@ class Matrix(object):
         # Initiaize identity Matrix
         self.matrix = identity(size)
 
-
+    @property
+    def c_matrix(self):
+        return convert_matrix(self.matrix)
+    
     def __mul__(self, other):
 
         if isinstance(other, Vector):

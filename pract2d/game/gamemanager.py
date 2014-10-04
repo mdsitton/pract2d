@@ -8,6 +8,121 @@ from pract2d.core import files
 import OpenGL.GL as gl
 from PIL import Image
 
+class ShaderBase(object):
+    def create(self):
+        self.shader = gl.glCreateShader(self.shaderType)
+        gl.glShaderSource(self.shader, self.shaderData)
+        gl.glCompileShader(self.shader)
+
+        status = gl.glGetShaderiv(self.shader, gl.GL_COMPILE_STATUS)
+
+        if not status:
+            print (self.shaderErrorMessage)
+            print (gl.glGetShaderInfoLog(self.shader))
+        else:
+            print (self.shaderSuccessMessage)
+
+
+class VertexShader(ShaderBase):
+    def __init__(self, path):
+        self.shaderData = files.read_file(path)
+        self.shaderErrorMessage = "Vertex Shader Compilation Error."
+        self.shaderSuccessMessage = "Vertex Shader Compiled successfully."
+        self.shaderType = gl.GL_VERTEX_SHADER
+
+
+class FragmentShader(ShaderBase):
+    def __init__(self, path):
+        self.shaderData = files.read_file(path)
+        self.shaderErrorMessage = "Fragment Shader Compilation Error."
+        self.shaderSuccessMessage = "Fragment Shader Compiled successfully."
+        self.shaderType = gl.GL_FRAGMENT_SHADER
+
+
+class ShaderProgram(object):
+    def __init__(self, vertex, fragment):
+
+        self.uniforms = {}
+
+        self.vertex = vertex
+        self.fragment = fragment
+
+        self.vertex.create()
+        self.fragment.create()
+        
+        self.program = gl.glCreateProgram()
+
+        gl.glAttachShader(self.program, self.vertex.shader)
+        gl.glAttachShader(self.program, self.fragment.shader)
+
+        gl.glLinkProgram(self.program)
+
+        status = gl.glGetProgramiv(self.program, gl.GL_LINK_STATUS)
+
+        if not status:
+            print ("Linking error: ")
+            print (gl.glGetProgramInfoLog(self.program))
+        else:
+            print ("Program linked successfully.")
+
+    def use(self, using=True):
+        if using is False:
+            prog = 0
+        else:
+            prog = self.program
+        gl.glUseProgram(prog)
+
+    def get_attribute(self, name):
+        return gl.glGetAttribLocation(self.program, name)
+
+    def new_uniform(self, name):
+
+        self.uniforms[name] = gl.glGetUniformLocation(self.program, name)
+
+    def set_uniform(self, name, value):
+
+        uniform = self.uniforms[name]
+
+        if isinstance(value, glmath.Vector):
+            value = value.vector
+
+        if isinstance(value, glmath.Matrix):
+            size = value.size
+            data = value.c_matrix
+
+            if size == 4:
+                gl.glUniformMatrix4fv(uniform, 1, gl.GL_FALSE, data)
+            elif size == 3:
+                gl.glUniformMatrix3fv(uniform, 1, gl.GL_FALSE, data)
+            elif size == 2:
+                gl.glUniformMatrix2fv(uniform, 1, gl.GL_FALSE, data)
+
+        elif isinstance(name, list) or isinstance(value, tuple):
+            size = len(value)
+
+            if isinstance(value[0], int):
+                if size == 4:
+                    gl.glUniform4i(uniform, *value)
+                elif size == 3:
+                    gl.glUniform3i(uniform, *value)
+                elif size == 2:
+                    gl.glUniform2i(uniform, *value)
+
+            elif isinstance(value[0], float):
+                if size == 4:
+                    gl.glUniform4f(uniform, *value)
+                elif size == 3:
+                    gl.glUniform3f(uniform, *value)
+                elif size == 2:
+                    gl.glUniform2f(uniform, *value)
+
+        elif isinstance(value, int):
+            gl.glUniform1i(uniform, value)
+
+        elif isinstance(value, float):
+            gl.glUniform1f(uniform, value)
+
+
 class GameManager(object):
     def __init__(self):
 
@@ -22,7 +137,6 @@ class GameManager(object):
 
         self.events.add_listener(self.event_handler)
 
-        print ('test')
         # Get opengl version number
         glVersionMajor = gl.glGetIntegerv(gl.GL_MAJOR_VERSION)
         glVersionMinor = gl.glGetIntegerv(gl.GL_MINOR_VERSION)
@@ -36,58 +150,22 @@ class GameManager(object):
 
         self.character = list(tmpChar.getdata())
 
-        print files.get_path()
-
-        # shaders
         vsPath = files.resolve_path("data", "shaders", "main.vs")
         fsPath = files.resolve_path("data", "shaders", "main.fs")
 
-        vsStrData = files.read_file(vsPath)
-        fsStrData = files.read_file(fsPath)
+        vertex = VertexShader(vsPath)
+        fragment = FragmentShader(fsPath)
+        self.program = ShaderProgram(vertex, fragment)
 
-        self.vertexShader = gl.glCreateShader(gl.GL_VERTEX_SHADER)
-        gl.glShaderSource(self.vertexShader, vsStrData)
-        gl.glCompileShader(self.vertexShader)
-        
-        status = gl.glGetShaderiv(self.vertexShader, gl.GL_COMPILE_STATUS)
+        self.program.use()
 
-        if not status:
-            print ("Error Vertex Shader")
-
-
-        self.fragmentShader = gl.glCreateShader(gl.GL_FRAGMENT_SHADER)
-        gl.glShaderSource(self.fragmentShader, fsStrData)
-        gl.glCompileShader(self.fragmentShader)
-
-        status = gl.glGetShaderiv(self.fragmentShader, gl.GL_COMPILE_STATUS)
-
-        if not status:
-            print ("Error Fragment Shader")
-
-        self.program = gl.glCreateProgram()
-        gl.glAttachShader(self.program, self.vertexShader)
-        gl.glAttachShader(self.program, self.fragmentShader)
-        gl.glLinkProgram(self.program)
-
-        status = gl.glGetProgramiv(self.program, gl.GL_LINK_STATUS)
-
-        if status:
-            print ("Program linked successfully.")
-        else:
-            print ("Linking error: ")
-
-        test = gl.glGetProgramInfoLog(self.program)
-        print (test)
-        gl.glUseProgram(self.program)
-
-        self.orthoLoc = gl.glGetUniformLocation(self.program, "ortho")
-        self.modelLoc = gl.glGetUniformLocation(self.program, "model")
-
+        self.program.new_uniform('ortho')
+        self.program.new_uniform('model')
 
         self.vao = gl.glGenVertexArrays(1)
         gl.glBindVertexArray(self.vao)
 
-        self.vertLoc = gl.glGetAttribLocation(self.program, b'position')
+        self.vertLoc = self.program.get_attribute('position')
 
         # Math
         self.ortho = glmath.ortho(0.0, self.height, self.width, 0.0, -1.0, 1.0)
@@ -108,8 +186,8 @@ class GameManager(object):
 
         gl.glDisableVertexAttribArray(self.vertLoc)
 
-        gl.glUniformMatrix4fv(self.orthoLoc, 1, gl.GL_FALSE, self.ortho.matrix)
-        gl.glUniformMatrix4fv(self.modelLoc, 1, gl.GL_FALSE, self.model.matrix)
+        self.program.set_uniform('ortho', self.ortho)
+        self.program.set_uniform('model', self.model)
 
     def render(self):
         gl.glClearColor(0.5, 0.5, 0.5, 1.0)
