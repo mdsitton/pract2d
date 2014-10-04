@@ -46,7 +46,7 @@ def ortho(left, right, bottom, top, zNear, zFar):
     rtnObj.matrix = rtnMat
     return rtnObj
 
-def convert_matrix(matrix):
+def convert_to_1d_matrix(matrix):
     ''' Converts a 2d matrix list to be used with PyOpenGL '''
     length = len(matrix)
     tempMatrix = (GLfloat * (length * length))()
@@ -54,6 +54,15 @@ def convert_matrix(matrix):
         for y in xrange(length):
             print (x*length+y)
             tempMatrix[x*length+y] = matrix[x][y]
+    return tempMatrix
+
+def convert_matrix(matrix):
+    ''' Converts a 2d matrix to be used with ctypes '''
+    length = len(matrix)
+    tempMatrix = (GLfloat * length * length)()
+    for x in range(length):
+        for y in range(length):
+            tempMatrix[x][y] = matrix[x][y]
     return tempMatrix
 
 class Vector(object):
